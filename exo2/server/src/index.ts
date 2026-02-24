@@ -2,8 +2,8 @@ import { WebSocketServer, WebSocket } from 'ws';
 import type { ServerMessage, ClientMessage } from '@shared/types';
 
 const server = new WebSocketServer({ port: 8686 });
-
 const nicks = new Map<WebSocket, string>();
+const rooms = new Map<string, Set<WebSocket>>();
 
 function broadcast(msg: ServerMessage) {
     for (const client of server.clients) {
@@ -14,6 +14,19 @@ function broadcast(msg: ServerMessage) {
 function broadcastUserList() {
     const users = Array.from(nicks.values());
     broadcast({ type: 'user-list', users });
+}
+
+function joinRoom(ws: WebSocket, room: string) {
+  if (!rooms.has(room))
+    rooms.set(room, new Set());
+  const r = rooms.get(room);
+  if(r) r.add(ws);
+}
+
+function broadcastToRoom(room: string, msg:ServerMessage) {
+  rooms.get(room)?.forEach(c => {
+    c.send(JSON.stringify(msg));
+  });
 }
 
 server.on('connection', (socket: WebSocket) => {
@@ -36,13 +49,23 @@ server.on('connection', (socket: WebSocket) => {
             }
             case 'chat': {
                 const nick = nicks.get(socket)!;
-                broadcast({ type: 'chat', nick, text: msg.text, ts: Date.now() });
+                broadcastToRoom(msg.room, { type: 'chat', nick, text: msg.text, room: msg.room, ts: Date.now() });
                 break;
             }
             case 'typing': {
                 const nick = nicks.get(socket)!;
-                broadcast({ type: 'typing', nick });
+                broadcastToRoom(msg.room, { type: 'typing', nick });
                 break;
+            }
+            case 'join-room': {
+                if(!rooms.get(msg.room)?.has(socket)) {
+                    joinRoom(socket, msg.room);
+                }
+            }
+            case 'leave-room': {
+                if(!rooms.get(msg.room)?.has(socket)) {
+                    rooms.get(msg.room)?.delete(socket);
+                }
             }
         }
     });
