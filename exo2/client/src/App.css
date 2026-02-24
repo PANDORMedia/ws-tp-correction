@@ -1,0 +1,72 @@
+.app {
+  display: flex;
+  height: 100vh;
+  font-family: sans-serif;
+}
+
+.sidebar {
+  width: 200px;
+  background: #1a1a1a;
+  padding: 16px;
+  border-right: 1px solid #333;
+}
+
+.sidebar h3 {
+  margin-top: 0;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 4px 0;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.nickname-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.nickname-bar input {
+  flex: 1;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #333;
+  padding: 8px;
+  margin-bottom: 12px;
+}
+
+.messages p {
+  margin: 4px 0;
+}
+
+.system {
+  color: #888;
+  font-style: italic;
+}
+
+.chat-bar {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.chat-bar input {
+  flex: 1;
+}
